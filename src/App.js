@@ -66,20 +66,23 @@ class App extends Component {
                             </Info>
                         )}
                     </InfoContainer>
-                    <MatrixContainer>
-                        {generateMatrixPressed &&
-                            inputsArray.map((e, index) => {
-                                return (
-                                    <MatrixInput
-                                        key={index}
-                                        onChange={this.handleChange.bind(
-                                            this,
-                                            index
-                                        )}
-                                    />
-                                );
-                            })}
-                    </MatrixContainer>
+                    <FullWidth>
+                        <MatrixContainer length={matrixIndex}>
+                            {generateMatrixPressed &&
+                                inputsArray.map((e, index) => {
+                                    return (
+                                        <MatrixInput
+                                            key={e.toString()}
+                                            onChange={this.handleChange.bind(
+                                                this,
+                                                index
+                                            )}
+                                        />
+                                    );
+                                })}
+                        </MatrixContainer>
+                    </FullWidth>
+
                     {generateMatrixPressed && matrixIndex > 0 && (
                         <SubmitMatrixContainer>
                             <SubmitMatrix
@@ -108,13 +111,15 @@ class App extends Component {
                     {dfsPressed &&
                         resultsObject.map((e, index) => {
                             return (
-                                <SearchPatternContainer key={index}>
-                                    <OriginalMatrix>
+                                <SearchPatternContainer key={e.searchPattern}>
+                                    <OriginalMatrix
+                                        length={this.state.matrixIndex}
+                                    >
                                         {inputsArray.map(e => {
                                             return (
-                                                <label key={index}>
+                                                <Element key={e}>
                                                     {` ${e.value} `}
-                                                </label>
+                                                </Element>
                                             );
                                         })}
                                     </OriginalMatrix>
@@ -125,19 +130,19 @@ class App extends Component {
                             );
                         })}
                     <PathContainer>
-                        {/* {dfsPressed &&
-                            destinations.map((e, index) => (
-                                <Path key={index}>
-                                    Path to destination {e}:{' '}
-                                    {resultsObject[0].path.join(', ')}
+                        {dfsPressed &&
+                            destinations.map((d, index) => (
+                                <Path key={d}>
+                                    Path to destination {d}:{' '}
+                                    {resultsObject[index].path.join(', ')}
                                 </Path>
-                            ))} */}
+                            ))}
                     </PathContainer>
                     <Iterations>
                         {dfsPressed &&
                             resultsObject.map((e, index) => {
                                 return (
-                                    <label key={index}>
+                                    <label key={e.path}>
                                         Number of iterations:{' '}
                                         {e.numberOfIterations}
                                         <br />
@@ -238,27 +243,17 @@ class App extends Component {
 
         for (let i = 0; i < destinations.length; ++i) {
             if (i === 0) {
-                resultObject = await dfsSearch(
-                    matrixArray,
-                    'X',
-                    destinations[i]
-                );
+                resultObject = dfsSearch(matrixArray, 'X', destinations[i]);
                 console.log('First Path');
                 console.log(resultObject);
                 resultObjects.push(resultObject);
-                resultObject = [];
             } else if (i === destinations.length - 1) {
-                resultObject = await dfsSearch(
-                    matrixArray,
-                    destinations[i],
-                    'X'
-                );
+                resultObject = dfsSearch(matrixArray, destinations[i], 'X');
                 console.log('Last Path');
                 console.log(resultObject);
                 resultObjects.push(resultObject);
-                resultObject = [];
             } else {
-                resultObject = await dfsSearch(
+                resultObject = dfsSearch(
                     matrixArray,
                     destinations[i],
                     destinations[i + 1]
@@ -266,7 +261,6 @@ class App extends Component {
                 console.log('Middle Path');
                 console.log(resultObject);
                 resultObjects.push(resultObject);
-                resultObject = [];
             }
         }
 
@@ -326,12 +320,11 @@ const Info = styled.p`
 
 const MatrixContainer = styled.div`
     display: flex;
-    /* flex-direction: column; */
-    justify-content: center;
+    flex-wrap: wrap;
+    width: ${props => props.length && `calc(${props.length} * 3rem)`};
 `;
 
 const MatrixInput = styled.input`
-    margin: 0 0.5rem;
     width: 2rem;
     height: 2rem;
     text-align: center;
@@ -384,11 +377,19 @@ const SearchPatternContainer = styled.div`
     width: 100%;
 `;
 
-const OriginalMatrix = styled.p`
+const OriginalMatrix = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    width: ${props => props.length && `calc(${props.length} * 3rem)`};
     text-align: center;
     border-left: 1px solid black;
     border-right: 1px solid black;
     margin-right: 10%;
+`;
+
+const Element = styled.div`
+    width: 2.5rem;
+    height: 2.5rem;
 `;
 
 const SearchPattern = styled.p`
@@ -402,3 +403,9 @@ const PathContainer = styled.div``;
 const Path = styled.p``;
 
 const Iterations = styled.p``;
+
+const FullWidth = styled.div`
+    display: flex;
+    justify-content: center;
+    width: 100%;
+`;
